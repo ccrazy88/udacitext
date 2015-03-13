@@ -17,7 +17,6 @@ Dependencies:
 To implement:
 
 - Categories (for users and announcements)
-- Proper do not disturb support
 - Replying to users
 - More interactive features...
 - An actual interface...

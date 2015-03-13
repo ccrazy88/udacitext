@@ -99,6 +99,13 @@ def queue_announcements_to_send():
                     FROM announcements_sent
                     WHERE status IN ('delivered', 'queued', 'sending', 'sent')
                 ) AND
+                phone_number NOT IN (
+                    SELECT phone_number
+                    FROM do_not_disturb
+                    WHERE
+                        EXTRACT(dow from current_date) = dow AND
+                        current_time BETWEEN start_time AND end_time
+                ) AND
                 current_timestamp BETWEEN start_timestamp AND end_timestamp;
             """
         )

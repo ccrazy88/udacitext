@@ -18,5 +18,7 @@ To implement:
 
 - Categories (for users and announcements)
 - Replying to users
+- Rate limits on announcements to not flood users
+- Image support
 - More interactive features...
 - An actual interface...

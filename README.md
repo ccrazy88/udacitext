@@ -13,3 +13,11 @@ Dependencies:
 - [Psycopg](http://initd.org/psycopg/)
 - [RQ](http://python-rq.org)
 - [Twilio](https://www.twilio.com)
+
+To implement:
+
+- Categories (for users and announcements)
+- Proper do not disturb support
+- Replying to users
+- More interactive features...
+- An actual interface...

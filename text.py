@@ -94,6 +94,10 @@ def queue_announcements_to_send():
                    image_urls
             FROM announcements, users
             WHERE
+                (phone_number, group_id) IN (
+                    SELECT phone_number, group_id
+                    FROM memberships
+                ) AND
                 (phone_number, id) NOT IN (
                     SELECT phone_number, announcement_id
                     FROM announcements_sent

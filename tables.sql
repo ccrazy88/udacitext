@@ -15,8 +15,20 @@ CREATE TABLE do_not_disturb (
     end_time time with time zone NOT NULL CHECK (end_time > start_time)
 );
 
+CREATE TABLE groups (
+    id serial PRIMARY KEY,
+    name text NOT NULL
+);
+
+CREATE TABLE memberships (
+    phone_number text NOT NULL REFERENCES users ON DELETE RESTRICT,
+    group_id integer NOT NULL REFERENCES groups (id) ON DELETE RESTRICT,
+    PRIMARY KEY (phone_number, group_id)
+);
+
 CREATE TABLE announcements (
     id serial PRIMARY KEY,
+    group_id integer NOT NULL REFERENCES groups (id) ON DELETE RESTRICT,
     body text NOT NULL,
     image_urls text[],
     start_timestamp timestamp with time zone NOT NULL,

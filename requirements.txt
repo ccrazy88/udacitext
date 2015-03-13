@@ -1,0 +1,4 @@
+redis==2.10.3
+click==3.3
+rq==0.5.1
+rq-scheduler==0.5.1

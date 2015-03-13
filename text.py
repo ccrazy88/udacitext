@@ -1,4 +1,3 @@
-from datetime import datetime
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
 import os
@@ -12,13 +11,14 @@ FAILED_STATUS = "failed"
 
 # PostgreSQL constants
 urlparse.uses_netloc.append("postgres")
-POSTGRES_URL = urlparse.urlparse(os.environ["DATABASE_URL"])
+postgres_url = os.getenv("DATABASE_URL", 'postgres://localhost:5432')
+url = urlparse.urlparse(postgres_url)
 POSTGRES_KWARGS = {
-    "database": POSTGRES_URL.path[1:],
-    "user": POSTGRES_URL.username,
-    "password": POSTGRES_URL.password,
-    "host": POSTGRES_URL.hostname,
-    "port": POSTGRES_URL.port
+    "database": url.path[1:],
+    "user": url.username,
+    "password": url.password,
+    "host": url.hostname,
+    "port": url.port
 }
 
 # Twilio constants
@@ -127,7 +127,7 @@ def queue_announcements_to_send():
                 connection, False,
                 """
                 INSERT INTO announcements_sent
-                VALUES (DEFAULT, %s, %s, %s, %s, %s, %s);
+                VALUES (DEFAULT, %s, %s, %s, %s, %s, %s, DEFAULT);
                 """, sent_tuple
             )
             if update_user:
@@ -135,9 +135,10 @@ def queue_announcements_to_send():
                     connection, False,
                     """
                     UPDATE users
-                    SET (opted_in, last_updated_timestamp) = (%s, %s)
+                    SET (opted_in, last_updated_timestamp) =
+                        (%s, current_timestamp)
                     WHERE phone_number = %s;
-                    """, (opted_in_updated, datetime.now(), phone_number)
+                    """, (opted_in_updated, phone_number)
                 )
 
 

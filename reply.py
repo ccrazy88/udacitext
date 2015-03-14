@@ -25,6 +25,8 @@ POSTGRES_KWARGS = {
 @app.route("/", methods=['GET', 'POST'])
 def receive():
     from_body = request.values.get('Body', None)
+
+    messages = []
     if from_body and from_body.strip().upper() in keywords:
         with psycopg2.connect(**POSTGRES_KWARGS) as connection:
             messages = execute_query(
@@ -36,6 +38,9 @@ def receive():
                                                 end_timestamp;
                 """
             )
+
+
+    if messages:
         body = ""
         for i, message in enumerate(messages):
             body += "({}/{}) {}\n".format(i, len(messages), message[0])

@@ -43,7 +43,7 @@ def receive():
     if messages:
         body = ""
         for i, message in enumerate(messages):
-            body += "({}/{}) {}\n".format(i, len(messages), message[0])
+            body += "({}/{}) {}\n".format(i + 1, len(messages), message[0])
     else:
         body = ("Welcome to Udacitext.\n"
                 "Text NOW to get the latest announcements! "

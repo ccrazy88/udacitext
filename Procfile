@@ -1,1 +1,1 @@
-worker: python -u worker.py
+web: bin/web

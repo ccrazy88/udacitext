@@ -34,16 +34,17 @@ def receive():
                 """
                 SELECT body
                 FROM announcements
-                WHERE current_timestamp BETWEEN start_timestamp AND
-                                                end_timestamp;
+                WHERE group_id IN (SELECT id FROM groups
+                                   WHERE name = 'Broadcast');
                 """
             )
-
-
-    if messages:
-        body = ""
-        for i, message in enumerate(messages):
-            body += "({}/{}) {}\n".format(i + 1, len(messages), message[0])
+        if messages:
+            body = ""
+            for i, message in enumerate(messages):
+                body += "({}/{}) {}\n".format(i + 1, len(messages), message[0])
+        else:
+            body = ("There aren't any announcements right now. "
+                    "Be sure to check back later!")
     else:
         body = ("Welcome to Udacitext.\n"
                 "Text NOW to get the latest announcements! "

@@ -1,41 +1,33 @@
 from flask import Flask, request
-import psycopg2
-import os
 import twilio.twiml
-import urlparse
+
+import utility
 
 
-# Application constants
 app = Flask(__name__)
-keywords = ["ANNOUNCEMENT", "ANNOUNCEMENTS", "LATEST", "NOW"]
-
-# PostgreSQL constants
-urlparse.uses_netloc.append("postgres")
-postgres_url = os.getenv("DATABASE_URL", 'postgres://localhost:5432')
-url = urlparse.urlparse(postgres_url)
-POSTGRES_KWARGS = {
-    "database": url.path[1:],
-    "user": url.username,
-    "password": url.password,
-    "host": url.hostname,
-    "port": url.port
-}
+KEYWORDS = ["ANNOUNCEMENT", "ANNOUNCEMENTS", "LATEST", "NOW"]
 
 
 @app.route("/", methods=['GET', 'POST'])
 def receive():
-    from_body = request.values.get('Body', None)
+    """Respond to texts sent via a Twilio endpoint.
 
+    Handle texts sent by sending the user a welcome message or, if appropriate,
+    a series of announcements."""
     messages = []
-    if from_body and from_body.strip().upper() in keywords:
-        with psycopg2.connect(**POSTGRES_KWARGS) as connection:
-            messages = execute_query(
+
+    # If the message received is one of the keywords, send the person some
+    # broadcasts. Otherwise, send them a welcome message.
+    from_body = request.values.get('Body', None)
+    if from_body and from_body.strip().upper() in KEYWORDS:
+        with utility.get_postgres_connection() as connection:
+            messages = utility.execute_query(
                 connection, True,
                 """
                 SELECT body
                 FROM announcements
                 WHERE group_id IN (SELECT id FROM groups
-                                   WHERE name = 'Broadcast');
+                                   WHERE UPPER(name) = 'BROADCAST');
                 """
             )
         if messages:
@@ -55,14 +47,6 @@ def receive():
     response = twilio.twiml.Response()
     response.message(body)
     return str(response)
-
-
-def execute_query(connection, return_results, query, *subs):
-    cursor = connection.cursor()
-    cursor.execute(query, *subs)
-    results = cursor.fetchall() if return_results else None
-    cursor.close()
-    return results
 
 
 if __name__ == "__main__":

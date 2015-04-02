@@ -69,8 +69,3 @@ CREATE TABLE error_log (
     error_message text,
     create_timestamp timestamp with time zone DEFAULT current_timestamp
 );
-
-CREATE TABLE executions (
-    id serial PRIMARY KEY,
-    create_timestamp timestamp with time zone DEFAULT current_timestamp
-);

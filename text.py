@@ -1,61 +1,20 @@
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
-import os
-import psycopg2
-import urlparse
+
+import utility
 
 
-# Application constants
 BLACKLISTED = 21610
 FAILED_STATUS = "failed"
-
-# PostgreSQL constants
-urlparse.uses_netloc.append("postgres")
-postgres_url = os.getenv("DATABASE_URL", 'postgres://localhost:5432')
-url = urlparse.urlparse(postgres_url)
-POSTGRES_KWARGS = {
-    "database": url.path[1:],
-    "user": url.username,
-    "password": url.password,
-    "host": url.hostname,
-    "port": url.port
-}
-
-# Twilio constants
-TWILIO_SID = os.environ["TWILIO_SID"]
-TWILIO_TOKEN = os.environ["TWILIO_TOKEN"]
-TWILIO_NUMBER = os.environ["TWILIO_NUMBER"]
-
-
-def execute_query(connection, return_results, query, *subs):
-    cursor = connection.cursor()
-    cursor.execute(query, *subs)
-    results = cursor.fetchall() if return_results else None
-    cursor.close()
-    return results
-
-
-def insert_error(connection, error, phone_number=None):
-    execute_query(
-        connection, False,
-        """
-        INSERT INTO error_log
-        VALUES (%s, %s, %s, %s, %s, %s, DEFAULT);
-        """,
-        (phone_number, error.status, error.uri, error.method, error.code,
-         error.msg)
-    )
-
-
-def insert_execution(connection):
-    execute_query(connection, False,
-                  """INSERT INTO executions VALUES (DEFAULT, DEFAULT)""")
+CLIENT = TwilioRestClient(utility.TWILIO_SID, utility.TWILIO_TOKEN)
 
 
 def update_announcements_sent():
-    with psycopg2.connect(**POSTGRES_KWARGS) as connection:
-        insert_execution(connection)
-        messages = execute_query(
+    """Update status of announcements sent because texts are asynchronous."""
+    with utility.get_postgres_connection() as connection:
+        # Messages that haven't had their status finalized are due for an
+        # update, if possible.
+        messages = utility.execute_query(
             connection, True,
             """
             SELECT message_sid
@@ -67,9 +26,8 @@ def update_announcements_sent():
         for message in messages:
             message_sid = message[0]
             try:
-                client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
-                message = client.messages.get(message_sid)
-                execute_query(
+                message = CLIENT.messages.get(message_sid)
+                utility.execute_query(
                     connection, False,
                     """
                     UPDATE announcements_sent
@@ -80,18 +38,17 @@ def update_announcements_sent():
                      message_sid)
                 )
             except TwilioRestException as e:
-                insert_error(connection, e)
+                utility.insert_error(connection, e)
 
 
 def queue_announcements_to_send():
-    with psycopg2.connect(**POSTGRES_KWARGS) as connection:
+    """Queue up texts to send."""
+    with utility.get_postgres_connection() as connection:
         connection.set_session(autocommit=True)
-        insert_execution(connection)
-        messages = execute_query(
+        messages = utility.execute_query(
             connection, True,
             """
-            SELECT phone_number, first_name, last_name, opted_in, id, body,
-                   image_urls
+            SELECT phone_number, opted_in, id, body
             FROM announcements, users
             WHERE
                 (phone_number, group_id) IN (
@@ -115,26 +72,24 @@ def queue_announcements_to_send():
         )
 
         for message in messages:
-            (phone_number, first_name, last_name, opted_in, announcement_id,
-             body, image_urls) = message
+            phone_number, opted_in, announcement_id, body = message
             try:
-                client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
-                message = client.messages.create(to=phone_number,
-                                                 from_=TWILIO_NUMBER,
+                message = CLIENT.messages.create(to=phone_number,
+                                                 from_=utility.TWILIO_NUMBER,
                                                  body=body)
                 sent_tuple = (phone_number, announcement_id, message.status,
                               None, None, message.sid)
                 update_user = True if not opted_in else False
                 opted_in_updated = True
             except TwilioRestException as error:
-                insert_error(connection, error, phone_number)
+                utility.insert_error(connection, error, phone_number)
                 sent_tuple = (phone_number, announcement_id, FAILED_STATUS,
                               error.code, error.msg, None)
                 update_user = (True if opted_in and error.code == BLACKLISTED
                                else False)
                 opted_in_updated = False
 
-            execute_query(
+            utility.execute_query(
                 connection, False,
                 """
                 INSERT INTO announcements_sent
@@ -142,7 +97,7 @@ def queue_announcements_to_send():
                 """, sent_tuple
             )
             if update_user:
-                execute_query(
+                utility.execute_query(
                     connection, False,
                     """
                     UPDATE users

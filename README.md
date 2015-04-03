@@ -50,3 +50,23 @@ Running locally:
 - Install PostgreSQL: `brew install postgres`
 - Install Redis: `brew install redis`
 - Set the environment variables for Twilio phone number, SID, and secret token
+
+## Use
+
+The web application accepts texts directed to your endpoint from Twilio. No
+configuration should be required except for ensuring that your settings in
+Twilio point to the correct URL.
+
+To schedule texts to be sent out, a few tables in PostgreSQL should be
+modified:
+
+- `users`: Put all phone numbers in here
+- `groups`: Define a group to send students the same messages
+- `memberships`: Connect users to groups
+- `announcements`: Add announcements to groups
+
+Announcements are assigned to a group and run for a specified amount of time.
+The Heroku scheduler calls a script every so often (configurable to be every
+ten minutes, every hour, or every day) that inspects these tables, determines
+which texts need to be attempted (anyone who hasn't received a valid text yet),
+and queues them up for Twilio to send.

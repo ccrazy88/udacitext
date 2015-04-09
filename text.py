@@ -60,6 +60,14 @@ def queue_announcements_to_send():
                     FROM announcements_sent
                     WHERE status IN ('delivered', 'queued', 'sending', 'sent')
                 ) AND
+                (phone_number, id) NOT IN (
+                    SELECT phone_number, announcement_id
+                    FROM announcements_sent
+                    GROUP BY phone_number, announcement_id
+                    HAVING
+                        ABS(EXTRACT(EPOCH FROM MAX(request_timestamp)) -
+                            EXTRACT(EPOCH FROM MIN(request_timestamp))) > 3600
+                ) AND
                 phone_number NOT IN (
                     SELECT phone_number
                     FROM do_not_disturb

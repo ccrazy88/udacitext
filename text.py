@@ -90,7 +90,6 @@ def queue_announcements_to_send():
                 update_user = True if not opted_in else False
                 opted_in_updated = True
             except TwilioRestException as error:
-                utility.insert_error(connection, error, phone_number)
                 sent_tuple = (phone_number, announcement_id, FAILED_STATUS,
                               error.code, error.msg, None)
                 update_user = (True if opted_in and error.code == BLACKLISTED

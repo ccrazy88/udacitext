@@ -2,19 +2,43 @@
 
 ## Summary
 
-Runs on Heroku.
+A small texting application. Runs on Heroku.
 
 Dependencies:
 
 - [gunicorn](http://gunicorn.org)
-- [psycopg](http://initd.org/psycopg/)
+- [psycopg2](http://initd.org/psycopg/)
 - [rq](http://python-rq.org)
 - [rq-scheduler](https://github.com/ui/rq-scheduler)
 - [twilio](https://www.twilio.com)
 
 See [requirements.txt](requirements.txt) for more details.
 
-## Installation
+## Run Locally
+
+1. Install [Homebrew](http://brew.sh)
+2. Install PostgreSQL: `brew install postgres`
+3. Install Redis: `brew install redis`
+4. Install all of the Python dependencies:
+   - `pip install gunicorn`
+   - `pip install psycopg2`
+   - `pip install rq`
+   - `pip install rq-scheduler`
+   - `pip install twilio`
+5. Create a [`.env`
+   file](https://devcenter.heroku.com/articles/config-vars#local-setup) in the
+   project directory which contains the Twilio-related environment variables:
+   - `TWILIO_NUMBER`
+   - `TWILIO_SID`
+   - `TWILIO_TOKEN`
+6. Configure and start PostgreSQL:
+   - In one terminal window, `createdb` and then
+   `postgres -D /usr/local/var/postgres`
+   - In another terminal window, `psql`
+7. Start Redis: `redis-server`
+8. In the project directory, start the project: `foreman start`
+
+## Deploy
 
 If you already have access to the repository or have already installed Heroku,
 feel free to skip steps one through three.
@@ -28,7 +52,7 @@ feel free to skip steps one through three.
    https://git.heroku.com/udacitext.git).
 5. Push the repository to Heroku: `git push heroku`.
 
-## Configuration
+## Configure
 
 Add-ons:
 
@@ -47,13 +71,6 @@ Configuration variables:
 - `TWILIO_NUMBER`: Phone number to text from
 - `TWILIO_SID`: Twilio API SID
 - `TWILIO_TOKEN`: Twilio secret token
-
-Running locally:
-
-- Install [Homebrew](http://brew.sh)
-- Install PostgreSQL: `brew install postgres`
-- Install Redis: `brew install redis`
-- Set the environment variables for Twilio phone number, SID, and secret token
 
 ## Use
 

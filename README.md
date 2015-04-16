@@ -6,9 +6,13 @@ Runs on Heroku.
 
 Dependencies:
 
-- [Psycopg](http://initd.org/psycopg/)
-- [RQ](http://python-rq.org)
-- [Twilio](https://www.twilio.com)
+- [gunicorn](http://gunicorn.org)
+- [psycopg](http://initd.org/psycopg/)
+- [rq](http://python-rq.org)
+- [rq-scheduler](https://github.com/ui/rq-scheduler)
+- [twilio](https://www.twilio.com)
+
+See [requirements.txt](requirements.txt) for more details.
 
 ## Installation
 

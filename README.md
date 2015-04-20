@@ -6,6 +6,7 @@ A small texting application. Runs on Heroku.
 
 Dependencies:
 
+- [flask](http://flask.pocoo.org)
 - [gunicorn](http://gunicorn.org)
 - [psycopg2](http://initd.org/psycopg/)
 - [rq](http://python-rq.org)
@@ -20,6 +21,7 @@ See [requirements.txt](requirements.txt) for more details.
 2. Install PostgreSQL: `brew install postgres`
 3. Install Redis: `brew install redis`
 4. Install all of the Python dependencies:
+   - `pip install flask`
    - `pip install gunicorn`
    - `pip install psycopg2`
    - `pip install rq`

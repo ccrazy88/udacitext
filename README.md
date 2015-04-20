@@ -35,8 +35,10 @@ See [requirements.txt](requirements.txt) for more details.
    - `TWILIO_TOKEN`
 6. Configure and start PostgreSQL: `createdb` and then
    `postgres -D /usr/local/var/postgres`
-7. In another terminal window, Start Redis: `redis-server`
-8. In yet another terminal window, navigate to the project directory and start
+7. In another terminal window, start Redis: `redis-server`
+8. In another terminal window, log into PostgreSQL and create all of the
+   tables: `psql` and `\i tables.sql`
+9. In yet another terminal window, navigate to the project directory and start
    the project: `foreman start`
 
 ## Deploy

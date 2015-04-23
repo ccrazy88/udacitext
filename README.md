@@ -15,31 +15,45 @@ Dependencies:
 
 See [requirements.txt](requirements.txt) for more details.
 
-## Run Locally
+## Local Setup
 
 1. Install [Homebrew](http://brew.sh)
-2. Install PostgreSQL: `brew install postgres`
-3. Install Redis: `brew install redis`
-4. Install all of the Python dependencies:
+2. Install Heroku: `brew install heroku-toolbelt`
+3. Install PostgreSQL: `brew install postgres`
+4. Install Redis: `brew install redis`
+5. Install all of the Python dependencies:
    - `pip install flask`
    - `pip install gunicorn`
    - `pip install psycopg2`
    - `pip install rq`
    - `pip install rq-scheduler`
    - `pip install twilio`
-5. Create a [`.env`
+6. Create a [`.env`
    file](https://devcenter.heroku.com/articles/config-vars#local-setup) in the
    project directory which contains the Twilio-related environment variables:
    - `TWILIO_NUMBER`
    - `TWILIO_SID`
    - `TWILIO_TOKEN`
-6. Configure and start PostgreSQL: `createdb` and then
-   `postgres -D /usr/local/var/postgres`
-7. In another terminal window, start Redis: `redis-server`
-8. In another terminal window, log into PostgreSQL and create all of the
+7. Start PostgreSQL: `postgres -D /usr/local/var/postgres`
+8. In another terminal window, create your database: `createdb`
+9. In that same terminal window, log into PostgreSQL and create all of the
    tables: `psql` and `\i tables.sql`
-9. In yet another terminal window, navigate to the project directory and start
-   the project: `foreman start`
+10. You're done! Feel free to close all of your Terminal windows.
+
+## Local Running
+
+1. In a terminal window, start Redis: `redis-server`
+2. In a second terminal window, start PostgreSQL: `postgres -D
+   /usr/local/var/postgres`
+3. In a third terminal window, log into PostgreSQL so you can modify tables:
+   `psql`
+4. In a fourth terminal window, navigate to the project directory and start it:
+   `heroku local`
+5. In a fifth terminal window, navigate to the project directory and import
+   the environment variables in your `.env` file, which you'll need to manually
+   trigger the scheduling of texts: `export $(cat .env | xargs)`
+6. In that same window, manually schedule texts when appropriate: `python
+   schedule.py`
 
 ## Deploy
 
